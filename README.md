@@ -71,9 +71,13 @@ This is my final simulation result, and following steps are taken for the valida
 
 With these operations taken, the following functions can be validated:
 Start/stop button: It is initially set high (unpressed), and when the button is pressed in step 1, the counter begins counting. In the 0.1s after the button is pressed, Hex6 increases from 0 to 9 to 0, and Hex5 increases from 0 to 1 at the same time when Hex6 changes from 0 to 9, which can validate that the stopwatch is counting. In step 3, the counter should stop counting when the button is pressed again, and this can be demonstrated by the fact that Hex6 stops increasing and remains constant.
+
 Hold button: It is initially set high (unpressed), and when it is pressed in step 2, the counter should stop counting. The fact that the Hex6 is suspended is proof of that. Then, when it is set to high (unpressed), the counter should continue to count, and the Hex6 indeed begin to increase.
+
 Reset switch: It is initially set to high (inactive), and when it is switched to low in step 5, the counter should be reset. This can be proved by the fact that both Hex5 and Hex6 are reset to 0. In step 6 when it is switched to high again, the counter should begin to count from 0 again, and this is evidenced by the increase of Hex6 from 0.
+
 Segment Display: The display of Hex5 and Hex6 is as expected. However, to enable the RTL simulation run smoothly, the simulation time is limited to less than 1s, so the display of Hex1-4 is not fully validated here, but in StopwatchLogic module, the number of minutes, seconds and centiseconds increase normally and automatically refresh when threshold is reached.
+
 Since the input clock signal of the whole module is 50MHz, the simulation time is just a fraction of a second to avoid too long time response, so it is hard to see if the functions of clock indicator and overflow are correct in this testbench, and the verification of their correctness is going to be discussed in the StopwatchLogic testbench.
 
 Simulating wave plots of StopwatchLogic:
@@ -82,16 +86,20 @@ Simulating wave plots of StopwatchLogic:
 
 This is the ending part of my StopwatchLogic simulation result where the counting number increases to 599999, and following functions can be validated:
 Overflow: Once the counter reaches 599999, it will stop until it is reset, and the Overflow is set high as long as the counter remain at 599999. From the graph it can be seen that the Overflow is in logic 0 when the counter is less than 99min99.99s and in logic 1 when it is 99min99.99s.
+
 Clock indicator: The clock indicator should toggle at 1 Hz when the stopwatch is counting, and it should keep where it was (either logic 1 or 0) when it is not counting. It can be seen that the clock indicator constantly switches the level when it is counting and it keeps at logic 0 while the counting is paused. 
 
 # 4. Conclusions and Critical Reflections
-**What I am most proud of: **
+**What I am most proud of:**
 In this project, I have paired all the modules with a testbench and validated them with the testbench, and the time that I have spent on validation is even more than writing the modules. Writing the modules while verifying them with the testbench is a necessary thing as it can ensure that each module built operates the functions that we want. Even though it is time consuming, it can avoid the case that we get confused which module is problematic when the hardware runs the program incorrectly. Through testbench, I did find many problems in the modules, such as some variables not being initialised resulting in no output on the waveform graph, and the clock indicator keeps flickering when the counter is paused at multiples of 50. 
+
 Besides, the writing of testbenches helped me to further understand what the functions of each module are, and what phenomena should be observed on the simulating waveform plots to validate that this module acts correctly. Finally, the program ran successfully on the board in one go because all the modules have been checked for correctness beforehand.
 
-**The most challenging part: **
+**The most challenging part:**
 The test process of the entire module was not smooth despite that I had successfully tested the Stopwatch logic module and the program had successfully run on the hardware. 
+
 The first difficulty I encountered is that the input clock signal of the whole module is 50MHz rather than 100Hz. The simulation workload will be enormous if we want to see the overflow of the minutes. That is to say, the simulation time must reach 99min99.99s, i.e. 599999 periods for the 100Hz signal, and this value of periods will be further multiplied by 500000 for the 50MHz clock signal. Actually, I tried to make the simulation last for a long time, but the conclusion was that it did not work because it was too slow. Therefore, the idea to validate the overflow function in the Stopwatch module was scrapped, and there are only fractions of a second in my simulation to test the functions of the buttons and the switch with a fast response. 
+
 The second difficulty is that the output of the whole module is the binary numbers for segment displays rather than the decimal numbers that we are familiar. Certainly we can also judge the simulation results step by step by the correspondence between them, but I would prefer to have the binary numbers reconverted to decimal numbers in advance in the testbench. Again, I thought of using the case statement to do the conversion, and the following figure is an example of how I wrote it, where the Min_10 is the number of minutes we want to get in tens.
 
 <img width="808" height="260" alt="image" src="https://github.com/user-attachments/assets/fa7cb678-aa72-4955-9c9d-d74fd30425d2" />
@@ -103,5 +111,6 @@ Having completed the requested stopwatch function, I thought about the possibili
 
 More specifically, it can be implemented like this:
 First, another unused switch can be used as the selection switch between the stopwatch mode and countdown timer mode. Secondly, after selecting the timer mode, the two keys are used for addition and subtraction, and three of the other unused switches can be used to select the time unit, i.e. minute, second and centisecond. After setting the time needed to be counted, there is a switch to confirm the selection. After confirmation, the two keys can be used as the start/stop button and the hold button again, and the reset switch still performs its original work.
+
 However, this is only my vision, and it must be difficult to implement both the functions at the same time on such a development board with only two keys and ten switched. Since there are several more switches used, it would be a complicated process to determine the priorities between the different switched and buttons, and it would be necessary to consider what operation the stopwatch performs under different combinations of switches and keys. To be honest, I'm not sure how much more time I'll need to complete it, as I'm currently finding it very difficult to implement and there would be definitely more difficulties than I could have imagined if I go ahead with it.
 
