@@ -1,6 +1,8 @@
 # 1. Introduction
 The full name of FPGA is Field Programmable Gate Array. It is a type of integrated circuit containing a series of programmable logic blocks and customizable interconnects that enable it to implement a wide range of digital circuits and systems. FPGAs offer flexibility and performance in digital circuit implementation compared to traditional application-specific integrated circuits (ASICs).
+
 This project aims to complete an FPGA-based design of a stopwatch, which has the functions of a Start/Stop button, Hold button, Reset switch, and six seven-segment LED displays. The states of the two buttons and the switch are indicated by 1 for the inactive and 0 for the active states. The program is compiled on Quartus in Verilog language, and the program device is MAX 10 10M50DAF484C7G. Besides, all the modules should be paired with a testbench and validated by the testbench.
+
 In this project, the following learning outcomes should be targeted:
 1.	Understand the block diagram of a stopwatch and further learn what is the underlying logic of a stopwatch.
 2.	Use the knowledge learned from the course and the engineering experience built before to complete the construction of modules in this project. 
@@ -19,16 +21,24 @@ To achieve this function, there are four submodules built in this project that a
 <img width="740" height="490" alt="image" src="https://github.com/user-attachments/assets/e2d8b497-8019-47cd-8bb5-8014983505c3" />
 
 First, convert the input level signal to flags indicating whether to count or pause.
+
 Secondly, take the flags, 100Hz clock signal and reset switch as the input of the counter. The counter module counts in centiseconds, and its internal logic causes it to count, stop counting, and reset based on its input. Besides, when the counter reaches 99min and 99.99s, i.e. the counting number equals to 599999, it will stop counting as well. 
+
 Thirdly, the counting number and the 100 Hz clock signal are taken as the input of the modules of “GetMin”, “GetSec”, and “GetDec”. Each time the clock signal triggers the falling edge, these three modules convert the counting number in centiseconds to corresponding number of minutes(0-99), seconds(0-59), and centiseconds(0-99).
+
 Simultaneously, the Clock indicator toggles each time when the counting number goes up by 50, and the Overflow changes from low to high when the counting number increases to 599999.
 
 # 2-3. Binary to Seven Segment Encoder
 The purpose of this module is to convert one six-bit binary number and two seven-bit binary numbers to 6 seven-bit binary numbers. To be more specific, these three binary numbers correspond to the number of minutes (0-99, 7 bits), seconds (0-59, 6 bits) and centiseconds (0-99, 7 bits) of the stopwatch, and the 6 seven-bit binary numbers represent the 7 display segments of each of the 6 digital tubes.
+
 To achieve this function, the process can be divided into two steps: first convert the three binary numbers to BCD, and then transform the BCD to the binary number for the segments. Therefore, there are two submodules that need to be built first, which in my project are respectively called “EightBinaryToBCD” and “BCDToSegment”.
+
 In Unit 4, we learned how to convert binary numbers to BCD using Boolean logic, but we only had to convert four-bit binary numbers at that time. If the binary number that needs to be converted becomes six or seven bits, using Boolean logic would become a cumbersome and completely unfeasible method. 
+
 In this project, the binary to BCD encoder has been provided, which converts an 8-bit binary number to a 12-bit BCD. Since the inputs are either 6 or 7 bits, add one or two 0 bits ahead to match the 8-bit inputs. The method used in the given module is the double dabble algorithm, which is also called the shift-and-add-3 algorithm, and it can be implemented using a small number of gates in computer hardware, but at the expense of high latency. The algorithm is designed to efficiently convert a binary number, represented as a string of ones and zeros, into a decimal number by repeatedly shifting the binary number left and adding it to an accumulator until the decimal representation is complete.
+
 As for the “BCDToSegment” submodule, it converts a 4-bit BCD to 7-bit binary number for the 7-segment display, and we have achieved this function in unit 4, which is also through the method of Boolean logic. For this time, I used the more straightforward “case” statement which we have also learnt in Unit 4.
+
 Finally, this whole module has been built using these two submodules, and three “EightBinaryToBCD” modules and six “BCDToSegment” modules have been used. 
 
 # 2-4. Stopwatch (Top-level entity)
@@ -37,9 +47,13 @@ After building the three main modules, the entire stopwatch module can be constr
 <img width="875" height="516" alt="image" src="https://github.com/user-attachments/assets/84c05b5c-5c4d-4bd9-aadf-d07feba5b302" />
 
 My general frame is based on the given block diagram, and so there is not much difference between them. One difference is that I added the rest 8 LED outputs and set them to low as these LEDs have a certain brightness by default which is not what I expected to see.
+
 The reset switch signal has the highest priority among all interactive functions. Once the negative edge is detected, the 100Hz signal will be set low, and the counter in Stopwatchlogic will reset to 0 and remain there while the reset is low. 
+
 Next, the hold button signal has a higher priority than the start/stop button signal. When the timer is counting normally, the counter in the Stopwatchlogic module will stop counting when the hold button is pressed (logic 0). 
+
 Then it comes to the start/stop button, which has the lowest priority. Each time when it is pressed (negative edge detected),  the “start” flag in the Stopwatchlogic indicating start or pause will take the inverse if the reset switch is inactive (logic 1) and the hold button is unpressed (logic 1). Next, the start flag, pause flag and reset will further determine whether the counter should count, pause or reset.
+
 Finally, the counting number is converted to numbers of minutes, seconds and centiseconds in the StopwatchLogic module, and these numbers are the inputs of the SevenSegmentEncoder module for the segment displays.
 
 # 3. Validation
@@ -54,6 +68,7 @@ This is my final simulation result, and following steps are taken for the valida
 4.	Press start/stop button once again for 0.05s.
 5.	Switch the reset to be 0 (active) for 0.05s.
 6.	Switch the reset to be 1 (inactive) for 0.05s.
+
 With these operations taken, the following functions can be validated:
 Start/stop button: It is initially set high (unpressed), and when the button is pressed in step 1, the counter begins counting. In the 0.1s after the button is pressed, Hex6 increases from 0 to 9 to 0, and Hex5 increases from 0 to 1 at the same time when Hex6 changes from 0 to 9, which can validate that the stopwatch is counting. In step 3, the counter should stop counting when the button is pressed again, and this can be demonstrated by the fact that Hex6 stops increasing and remains constant.
 Hold button: It is initially set high (unpressed), and when it is pressed in step 2, the counter should stop counting. The fact that the Hex6 is suspended is proof of that. Then, when it is set to high (unpressed), the counter should continue to count, and the Hex6 indeed begin to increase.
@@ -85,6 +100,7 @@ However, after applying this conversion to all the six binary numbers, the conve
 
 **Outlook for additional functions:**
 Having completed the requested stopwatch function, I thought about the possibility of continuing to add a countdown timer functionality to this design because it is a very useful function usually combined with a stopwatch. My idea was to design a countdown timer that would allow the users to set the count down time, and it would still be able to be paused and reset during the countdown. 
+
 More specifically, it can be implemented like this:
 First, another unused switch can be used as the selection switch between the stopwatch mode and countdown timer mode. Secondly, after selecting the timer mode, the two keys are used for addition and subtraction, and three of the other unused switches can be used to select the time unit, i.e. minute, second and centisecond. After setting the time needed to be counted, there is a switch to confirm the selection. After confirmation, the two keys can be used as the start/stop button and the hold button again, and the reset switch still performs its original work.
 However, this is only my vision, and it must be difficult to implement both the functions at the same time on such a development board with only two keys and ten switched. Since there are several more switches used, it would be a complicated process to determine the priorities between the different switched and buttons, and it would be necessary to consider what operation the stopwatch performs under different combinations of switches and keys. To be honest, I'm not sure how much more time I'll need to complete it, as I'm currently finding it very difficult to implement and there would be definitely more difficulties than I could have imagined if I go ahead with it.
