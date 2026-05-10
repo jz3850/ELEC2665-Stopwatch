@@ -84,6 +84,7 @@ Simulating wave plots of StopwatchLogic:
 
 <img width="940" height="376" alt="image" src="https://github.com/user-attachments/assets/931c18cc-4259-460e-afaf-2b01e81d21d7" />
 
+
 This is the ending part of my StopwatchLogic simulation result where the counting number increases to 599999, and following functions can be validated:
 Overflow: Once the counter reaches 599999, it will stop until it is reset, and the Overflow is set high as long as the counter remain at 599999. From the graph it can be seen that the Overflow is in logic 0 when the counter is less than 99min99.99s and in logic 1 when it is 99min99.99s.
 
